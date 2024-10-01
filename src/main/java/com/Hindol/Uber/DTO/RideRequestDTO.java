@@ -17,6 +17,7 @@ public class RideRequestDTO {
     private PointDTO dropOffLocation;
     private LocalDateTime requestedTime;
     private RiderDTO rider;
+    private Double fare;
     private PaymentMethod paymentMethod;
     private RideRequestStatus rideRequestStatus;
 }
