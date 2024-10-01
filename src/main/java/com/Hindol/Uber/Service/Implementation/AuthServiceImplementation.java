@@ -9,6 +9,7 @@ import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.UserRepository;
 import com.Hindol.Uber.Service.AuthService;
 import com.Hindol.Uber.Service.RiderService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class AuthServiceImplementation implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserDTO signUp(SignUpDTO signUpDTO) {
         User user = userRepository.findByEmail(signUpDTO.getEmail()).orElse(null);
         if(user != null) {

@@ -12,7 +12,7 @@ import com.Hindol.Uber.Repository.RideRequestRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
 import com.Hindol.Uber.Service.RiderService;
 import com.Hindol.Uber.Strategy.DriverMatchingStrategy;
-import com.Hindol.Uber.Strategy.RideFareCalculatorStrategy;
+import com.Hindol.Uber.Strategy.RideFareCalculationStrategy;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.List;
 public class RiderServiceImplementation implements RiderService {
 
     private final ModelMapper modelMapper;
-    private final RideFareCalculatorStrategy rideFareCalculatorStrategy;
+    private final RideFareCalculationStrategy rideFareCalculationStrategy;
     private final DriverMatchingStrategy driverMatchingStrategy;
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
@@ -33,7 +33,7 @@ public class RiderServiceImplementation implements RiderService {
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
-        Double fare = rideFareCalculatorStrategy.calculateFare(rideRequest);
+        Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
         rideRequest.setFare(fare);
         RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
         driverMatchingStrategy.findMatchingDriver(rideRequest);
