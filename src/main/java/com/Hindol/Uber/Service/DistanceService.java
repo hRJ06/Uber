@@ -1,5 +1,7 @@
 package com.Hindol.Uber.Service;
 
-public interface DistanceService {
+import org.locationtech.jts.geom.Point;
 
+public interface DistanceService {
+    Double calculateDistance(Point pickUpLocation, Point dropOffLocation);
 }

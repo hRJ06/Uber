@@ -4,6 +4,8 @@ import com.Hindol.Uber.DTO.DriverDTO;
 import com.Hindol.Uber.DTO.RideDTO;
 import com.Hindol.Uber.DTO.RideRequestDTO;
 import com.Hindol.Uber.DTO.RiderDTO;
+import com.Hindol.Uber.Entity.Rider;
+import com.Hindol.Uber.Entity.User;
 
 import java.util.List;
 
@@ -15,4 +17,5 @@ public interface RiderService {
     DriverDTO rateDriver(Long rideId, Integer rating);
     RiderDTO getMyProfile();
     List<RideDTO> getAllMyRides();
+    Rider createNewDriver(User user);
 }
