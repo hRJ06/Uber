@@ -11,6 +11,7 @@ import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.RideRequestRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
 import com.Hindol.Uber.Service.DriverService;
+import com.Hindol.Uber.Service.RatingService;
 import com.Hindol.Uber.Service.RideService;
 import com.Hindol.Uber.Service.RiderService;
 import com.Hindol.Uber.Strategy.RideStrategyManager;
@@ -33,7 +34,7 @@ public class RiderServiceImplementation implements RiderService {
     private final RiderRepository riderRepository;
     private final RideService rideService;
     private final DriverService driverService;
-
+    private final RatingService ratingService;
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
@@ -69,7 +70,15 @@ public class RiderServiceImplementation implements RiderService {
 
     @Override
     public DriverDTO rateDriver(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+        if(!rider.equals(ride.getRider())) {
+            throw new RuntimeException("Rider is not owner of ride");
+        }
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride status is not ended, hence cannot rate driver");
+        }
+        return ratingService.rateDriver(ride, rating);
     }
 
     @Override

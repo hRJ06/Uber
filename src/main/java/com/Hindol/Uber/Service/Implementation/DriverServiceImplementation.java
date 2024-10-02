@@ -10,10 +10,7 @@ import com.Hindol.Uber.Entity.Ride;
 import com.Hindol.Uber.Entity.RideRequest;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.DriverRepository;
-import com.Hindol.Uber.Service.DriverService;
-import com.Hindol.Uber.Service.PaymentService;
-import com.Hindol.Uber.Service.RideRequestService;
-import com.Hindol.Uber.Service.RideService;
+import com.Hindol.Uber.Service.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,6 +28,7 @@ public class DriverServiceImplementation implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
     @Override
     @Transactional
     public RideDTO acceptRide(Long rideRequestId) {
@@ -78,6 +76,7 @@ public class DriverServiceImplementation implements DriverService {
         ride.setStartedAt(LocalDateTime.now());
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
         paymentService.createNewPayment(savedRide);
+        ratingService.createNewRating(savedRide);
         return modelMapper.map(savedRide, RideDTO.class);
     }
 
@@ -101,7 +100,15 @@ public class DriverServiceImplementation implements DriverService {
 
     @Override
     public RiderDTO rateRider(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+        if(!driver.equals(ride.getDriver())) {
+            throw new RuntimeException("Driver is not the owner of ride");
+        }
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride status is not ended, hence cannot rate rider");
+        }
+        return ratingService.rateRider(ride, rating);
     }
 
     @Override
