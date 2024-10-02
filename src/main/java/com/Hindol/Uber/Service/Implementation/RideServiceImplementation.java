@@ -1,6 +1,5 @@
 package com.Hindol.Uber.Service.Implementation;
 
-import com.Hindol.Uber.DTO.RideRequestDTO;
 import com.Hindol.Uber.Entity.Driver;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;

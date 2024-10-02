@@ -9,6 +9,7 @@ import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.UserRepository;
 import com.Hindol.Uber.Service.AuthService;
 import com.Hindol.Uber.Service.RiderService;
+import com.Hindol.Uber.Service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,7 +23,7 @@ public class AuthServiceImplementation implements AuthService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final RiderService riderService;
-
+    private final WalletService walletService;
     @Override
     public String login(String email, String password) {
         return "";
@@ -39,7 +40,7 @@ public class AuthServiceImplementation implements AuthService {
         mappedUser.setRoles(Set.of(Role.RIDER));
         User savedUser = userRepository.save(mappedUser);
         riderService.createNewDriver(savedUser);
-        /* TODO: Add wallet related service */
+        walletService.createNewWallet(savedUser);
         return modelMapper.map(savedUser, UserDTO.class);
     }
 

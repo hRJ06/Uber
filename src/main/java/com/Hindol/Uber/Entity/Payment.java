@@ -3,10 +3,16 @@ package com.Hindol.Uber.Entity;
 import com.Hindol.Uber.Entity.Enum.PaymentMethod;
 import com.Hindol.Uber.Entity.Enum.PaymentStatus;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

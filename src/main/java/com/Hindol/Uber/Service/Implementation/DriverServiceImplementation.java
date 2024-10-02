@@ -11,6 +11,7 @@ import com.Hindol.Uber.Entity.RideRequest;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.DriverRepository;
 import com.Hindol.Uber.Service.DriverService;
+import com.Hindol.Uber.Service.PaymentService;
 import com.Hindol.Uber.Service.RideRequestService;
 import com.Hindol.Uber.Service.RideService;
 import jakarta.transaction.Transactional;
@@ -29,6 +30,7 @@ public class DriverServiceImplementation implements DriverService {
     private final DriverRepository driverRepository;
     private final RideService rideService;
     private final ModelMapper modelMapper;
+    private final PaymentService paymentService;
     @Override
     @Transactional
     public RideDTO acceptRide(Long rideRequestId) {
@@ -75,12 +77,26 @@ public class DriverServiceImplementation implements DriverService {
         }
         ride.setStartedAt(LocalDateTime.now());
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
+        paymentService.createNewPayment(savedRide);
         return modelMapper.map(savedRide, RideDTO.class);
     }
 
     @Override
+    @Transactional
     public RideDTO endRide(Long rideId) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+        if(!driver.equals(ride.getDriver())) {
+            throw new RuntimeException("Driver cannot start a ride as he has not accepted it earlier");
+        }
+        if(!ride.getRideStatus().equals(RideStatus.ONGOING)) {
+            throw new RuntimeException("Ride status is not ongoing, hence cannot be ended, status : " + ride.getRideStatus());
+        }
+        ride.setEndedAt(LocalDateTime.now());
+        Ride updatedRide = rideService.updateRideStatus(ride, RideStatus.ENDED);
+        updateDriverAvailability(driver, true);
+        paymentService.processPayment(ride);
+        return modelMapper.map(updatedRide, RideDTO.class);
     }
 
     @Override
