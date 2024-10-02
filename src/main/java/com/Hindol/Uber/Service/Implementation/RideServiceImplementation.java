@@ -6,6 +6,7 @@ import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
 import com.Hindol.Uber.Entity.Ride;
 import com.Hindol.Uber.Entity.RideRequest;
+import com.Hindol.Uber.Entity.Rider;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.RideRepository;
 import com.Hindol.Uber.Service.RideRequestService;
@@ -30,16 +31,12 @@ public class RideServiceImplementation implements RideService {
     }
 
     @Override
-    public void matchWithDrivers(RideRequestDTO rideRequestDTO) {
-
-    }
-
-    @Override
     public Ride createNewRide(RideRequest rideRequest, Driver driver) {
         rideRequest.setRideRequestStatus(RideRequestStatus.CONFIRMED);
         Ride ride = modelMapper.map(rideRequest, Ride.class);
         ride.setRideStatus(RideStatus.CONFIRMED);
         ride.setDriver(driver);
+        /* TODO: Remove OTP field for Driver */
         ride.setOtp(generateRandomOTP());
         ride.setId(null);
         rideRequestService.update(rideRequest);
@@ -53,13 +50,13 @@ public class RideServiceImplementation implements RideService {
     }
 
     @Override
-    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepository.findByRider(rider, pageRequest);
     }
 
     @Override
-    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepository.findByDriver(driver, pageRequest);
     }
 
     private String generateRandomOTP() {

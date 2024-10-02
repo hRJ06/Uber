@@ -6,17 +6,15 @@ import com.Hindol.Uber.DTO.RideRequestDTO;
 import com.Hindol.Uber.DTO.RiderDTO;
 import com.Hindol.Uber.Entity.Rider;
 import com.Hindol.Uber.Entity.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 public interface RiderService {
     RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
     RideDTO cancelRide(Long rideId);
-    RideDTO startRide(Long rideId);
-    RideDTO endRide(Long rideId);
     DriverDTO rateDriver(Long rideId, Integer rating);
     RiderDTO getMyProfile();
-    List<RideDTO> getAllMyRides();
+    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
     void createNewDriver(User user);
-    Rider getCurrentDriver();
+    Rider getCurrentRider();
 }

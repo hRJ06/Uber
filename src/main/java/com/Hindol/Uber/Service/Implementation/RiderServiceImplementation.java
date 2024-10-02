@@ -4,19 +4,21 @@ import com.Hindol.Uber.DTO.DriverDTO;
 import com.Hindol.Uber.DTO.RideDTO;
 import com.Hindol.Uber.DTO.RideRequestDTO;
 import com.Hindol.Uber.DTO.RiderDTO;
-import com.Hindol.Uber.Entity.Driver;
+import com.Hindol.Uber.Entity.*;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
-import com.Hindol.Uber.Entity.RideRequest;
-import com.Hindol.Uber.Entity.Rider;
-import com.Hindol.Uber.Entity.User;
+import com.Hindol.Uber.Entity.Enum.RideStatus;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.RideRequestRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
+import com.Hindol.Uber.Service.DriverService;
+import com.Hindol.Uber.Service.RideService;
 import com.Hindol.Uber.Service.RiderService;
 import com.Hindol.Uber.Strategy.RideStrategyManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,11 +31,13 @@ public class RiderServiceImplementation implements RiderService {
     private final RideStrategyManager rideStrategyManager;
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
+    private final RideService rideService;
+    private final DriverService driverService;
 
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
-        Rider rider = getCurrentDriver();
+        Rider rider = this.getCurrentRider();
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
         rideRequest.setRider(rider);
@@ -50,17 +54,17 @@ public class RiderServiceImplementation implements RiderService {
 
     @Override
     public RideDTO cancelRide(Long rideId) {
-        return null;
-    }
-
-    @Override
-    public RideDTO startRide(Long rideId) {
-        return null;
-    }
-
-    @Override
-    public RideDTO endRide(Long rideId) {
-        return null;
+        Rider rider = this.getCurrentRider();
+        Ride ride = rideService.getRideById(rideId);
+        if(!ride.getRider().equals(rider)) {
+            throw new RuntimeException("Rider does not own this ride with ID : " + rideId);
+        }
+        if(ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+            throw new RuntimeException("Ride cannot be cancelled, invalid status : " + ride.getRideStatus());
+        }
+        Ride updatedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        driverService.updateDriverAvailability(ride.getDriver(), true);
+        return modelMapper.map(updatedRide, RideDTO.class);
     }
 
     @Override
@@ -70,12 +74,14 @@ public class RiderServiceImplementation implements RiderService {
 
     @Override
     public RiderDTO getMyProfile() {
-        return null;
+        Rider rider = getCurrentRider();
+        return modelMapper.map(rider, RiderDTO.class);
     }
 
     @Override
-    public List<RideDTO> getAllMyRides() {
-        return List.of();
+    public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+        return rideService.getAllRidesOfRider(currentRider, pageRequest).map(ride -> modelMapper.map(ride, RideDTO.class));
     }
 
     @Override
@@ -88,7 +94,7 @@ public class RiderServiceImplementation implements RiderService {
     }
 
     @Override
-    public Rider getCurrentDriver() {
+    public Rider getCurrentRider() {
         /* TODO: Implement Spring Security*/
         return riderRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException("No Rider found with ID : 1"));
     }
