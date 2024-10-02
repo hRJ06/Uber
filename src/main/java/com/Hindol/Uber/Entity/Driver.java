@@ -1,13 +1,15 @@
 package com.Hindol.Uber.Entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +19,7 @@ public class Driver {
     private User user;
     private Double rating;
     private Boolean available;
-
+    private String vehicleId;
     @Column(columnDefinition = "Geometry(Point, 4326)")
     Point currentLocation;
 }

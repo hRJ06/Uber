@@ -3,11 +3,14 @@ package com.Hindol.Uber.Service.Implementation;
 import com.Hindol.Uber.DTO.DriverDTO;
 import com.Hindol.Uber.DTO.SignUpDTO;
 import com.Hindol.Uber.DTO.UserDTO;
+import com.Hindol.Uber.Entity.Driver;
 import com.Hindol.Uber.Entity.Enum.Role;
 import com.Hindol.Uber.Entity.User;
+import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.UserRepository;
 import com.Hindol.Uber.Service.AuthService;
+import com.Hindol.Uber.Service.DriverService;
 import com.Hindol.Uber.Service.RiderService;
 import com.Hindol.Uber.Service.WalletService;
 import jakarta.transaction.Transactional;
@@ -24,6 +27,7 @@ public class AuthServiceImplementation implements AuthService {
     private final UserRepository userRepository;
     private final RiderService riderService;
     private final WalletService walletService;
+    private final DriverService driverService;
     @Override
     public String login(String email, String password) {
         return "";
@@ -45,7 +49,18 @@ public class AuthServiceImplementation implements AuthService {
     }
 
     @Override
-    public DriverDTO onboardNewDriver(String userId) {
-        return null;
+    public DriverDTO onboardNewDriver(Long userId, String vehicleId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No User found with ID : " + userId));
+        if(user.getRoles().contains(Role.DRIVER)) throw new RuntimeConflictException("User with ID : " + userId + " is already a driver");
+        Driver driver = Driver.builder()
+                .user(user)
+                .vehicleId(vehicleId)
+                .rating(0.0)
+                .available(true)
+                .build();
+        user.getRoles().add(Role.DRIVER);
+        userRepository.save(user);
+        Driver savedDriver = driverService.createNewDriver(driver);
+        return modelMapper.map(savedDriver, DriverDTO.class);
     }
 }
