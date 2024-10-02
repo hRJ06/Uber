@@ -7,6 +7,7 @@ import com.Hindol.Uber.Entity.Rating;
 import com.Hindol.Uber.Entity.Ride;
 import com.Hindol.Uber.Entity.Rider;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
+import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.DriverRepository;
 import com.Hindol.Uber.Repository.RatingRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
@@ -27,6 +28,9 @@ public class RatingServiceImplementation implements RatingService {
     public DriverDTO rateDriver(Ride ride, Integer rating) {
         Driver driver = ride.getDriver();
         Rating ratingObj = ratingRepository.findByRide(ride).orElseThrow(() -> new ResourceNotFoundException("No Rating found for Ride ID : " + ride.getId()));
+        if(ratingObj.getDriverRating() != null) {
+            throw new RuntimeConflictException("Driver is already been rated");
+        }
         ratingObj.setDriverRating(rating);
         ratingRepository.save(ratingObj);
         Double newRating = ratingRepository.findByDriver(driver)
@@ -42,6 +46,9 @@ public class RatingServiceImplementation implements RatingService {
     public RiderDTO rateRider(Ride ride, Integer rating) {
         Rider rider = ride.getRider();
         Rating ratingObj = ratingRepository.findByRide(ride).orElseThrow(() -> new ResourceNotFoundException("No Rating found for Ride ID : " + ride.getId()));
+        if(ratingObj.getRiderRating() != null) {
+            throw new RuntimeConflictException("Rider is already been rated");
+        }
         ratingObj.setRiderRating(rating);
         ratingRepository.save(ratingObj);
         Double newRating = ratingRepository.findByRider(rider)
