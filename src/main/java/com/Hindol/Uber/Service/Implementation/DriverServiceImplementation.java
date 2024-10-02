@@ -8,6 +8,7 @@ import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
 import com.Hindol.Uber.Entity.Ride;
 import com.Hindol.Uber.Entity.RideRequest;
+import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.DriverRepository;
 import com.Hindol.Uber.Service.*;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -125,7 +127,8 @@ public class DriverServiceImplementation implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
-        return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("No Driver found with ID : 2"));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return driverRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("No Driver associated with User having ID : " + user.getId()));
     }
 
     @Override

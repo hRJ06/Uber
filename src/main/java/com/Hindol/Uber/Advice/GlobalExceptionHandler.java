@@ -2,6 +2,7 @@ package com.Hindol.Uber.Advice;
 
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Exception.RuntimeConflictException;
+import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,14 @@ public class GlobalExceptionHandler {
         log.error("AUTHENTICATION ERROR : {}", apiError);
         return new ResponseEntity<APIError>(apiError, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<APIError> handleJwtException(JwtException jwtException) {
+        APIError apiError = APIError.builder().httpStatus(HttpStatus.UNAUTHORIZED).message(jwtException.getLocalizedMessage()).build();
+        log.error("AUTHENTICATION ERROR : {}", apiError);
+        return new ResponseEntity<APIError>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIError> handleInternalServerError(Exception ex) {
