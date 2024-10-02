@@ -46,7 +46,7 @@ public class RatingServiceImplementation implements RatingService {
         ratingRepository.save(ratingObj);
         Double newRating = ratingRepository.findByRider(rider)
                 .stream()
-                .mapToDouble(Rating::getDriverRating)
+                .mapToDouble(Rating::getRiderRating)
                 .average().orElse(0.0);
         rider.setRating(newRating);
         Rider savedRider = riderRepository.save(rider);
