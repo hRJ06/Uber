@@ -1,7 +1,7 @@
 package com.Hindol.Uber.Security;
 
 import com.Hindol.Uber.Entity.User;
-import com.Hindol.Uber.Service.Implementation.UserService;
+import com.Hindol.Uber.Service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

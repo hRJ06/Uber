@@ -1,4 +1,4 @@
-package com.Hindol.Uber.Service.Implementation;
+package com.Hindol.Uber.Service;
 
 import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
