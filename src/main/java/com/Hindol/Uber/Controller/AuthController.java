@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,9 @@ public class AuthController {
     private final AuthService authService;
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> signUp(@RequestBody SignUpDTO signUpDTO) {
-        return ResponseEntity.ok(authService.signUp(signUpDTO));
+        return new ResponseEntity<>(authService.signUp(signUpDTO), HttpStatus.CREATED);
     }
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/onboardNewDriver/{userId}")
     public ResponseEntity<DriverDTO> onBoardNewDriver(@PathVariable Long userId, @RequestBody OnboardDriverDTO onboardDriverDTO) {
         return new ResponseEntity<>(authService.onboardNewDriver(userId, onboardDriverDTO.getVehicleId()), HttpStatus.CREATED);
