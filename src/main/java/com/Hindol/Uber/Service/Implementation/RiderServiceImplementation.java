@@ -10,13 +10,12 @@ import com.Hindol.Uber.Entity.Enum.RideStatus;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.RideRequestRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
-import com.Hindol.Uber.Service.DriverService;
-import com.Hindol.Uber.Service.RatingService;
-import com.Hindol.Uber.Service.RideService;
-import com.Hindol.Uber.Service.RiderService;
+import com.Hindol.Uber.Service.*;
 import com.Hindol.Uber.Strategy.RideStrategyManager;
+import com.Hindol.Uber.Util.EmailUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RiderServiceImplementation implements RiderService {
 
     private final ModelMapper modelMapper;
@@ -36,6 +36,7 @@ public class RiderServiceImplementation implements RiderService {
     private final RideService rideService;
     private final DriverService driverService;
     private final RatingService ratingService;
+    private final EmailSenderService emailSenderService;
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
@@ -49,8 +50,16 @@ public class RiderServiceImplementation implements RiderService {
 
         RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
         List<Driver> driverList = rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDriver(rideRequest);
-        /* TODO: Send notification to all the drivers about the Ride Request */
 
+        String riderName = rider.getUser().getName();
+        String subject = EmailUtil.generateRideRequestEmailSubject(riderName);
+
+        for(Driver driver : driverList) {
+            log.info("Driver - {}", driver);
+            String body = EmailUtil.generateRideRequestEmail(rideRequest, driver);
+            String driverEmail = driver.getUser().getEmail();
+            emailSenderService.sendEmail(driverEmail, subject, body);
+        }
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
