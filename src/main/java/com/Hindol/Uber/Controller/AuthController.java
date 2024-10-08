@@ -5,11 +5,11 @@ import com.Hindol.Uber.Service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ import java.util.Arrays;
 public class AuthController {
     private final AuthService authService;
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signUp(@RequestBody SignUpDTO signUpDTO) {
+    public ResponseEntity<UserDTO> signUp(@RequestBody @Valid SignUpDTO signUpDTO) {
         return new ResponseEntity<>(authService.signUp(signUpDTO), HttpStatus.CREATED);
     }
     @Secured("ROLE_ADMIN")

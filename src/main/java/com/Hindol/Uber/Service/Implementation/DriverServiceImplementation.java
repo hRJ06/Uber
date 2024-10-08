@@ -12,6 +12,7 @@ import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Repository.DriverRepository;
 import com.Hindol.Uber.Service.*;
+import com.Hindol.Uber.Util.EmailUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,6 +32,7 @@ public class DriverServiceImplementation implements DriverService {
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
     private final RatingService ratingService;
+    private final EmailSenderService emailSenderService;
     @Override
     @Transactional
     public RideDTO acceptRide(Long rideRequestId) {
@@ -44,6 +46,18 @@ public class DriverServiceImplementation implements DriverService {
         }
         Driver updatedDriver = updateDriverAvailability(currentDriver, false);
         Ride ride = rideService.createNewRide(rideRequest, updatedDriver);
+
+        String riderEmail = ride.getRider().getUser().getEmail();
+        String rider_email_subject = EmailUtil.generateRideConfirmationEmailSubjectForRider(updatedDriver);
+        String rider_email_body = EmailUtil.generateRideConfirmationEmailForRider(ride, updatedDriver);
+        emailSenderService.sendEmail(riderEmail, rider_email_subject, rider_email_body);
+
+        String driverEmail = currentDriver.getUser().getEmail();
+        String driver_email_subject = EmailUtil.generateRideConfirmationEmailSubjectForDriver(ride.getRider());
+        String driver_email_body = EmailUtil.generateRideConfirmationEmailForDriver(ride, ride.getRider());
+        emailSenderService.sendEmail(driverEmail, driver_email_subject, driver_email_body);
+
+        ride.setOtp(null);
         return modelMapper.map(ride, RideDTO.class);
     }
 
