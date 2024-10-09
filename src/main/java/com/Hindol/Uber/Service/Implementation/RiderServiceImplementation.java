@@ -40,6 +40,7 @@ public class RiderServiceImplementation implements RiderService {
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
+        log.info("Requesting Ride");
         Rider rider = this.getCurrentRider();
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
@@ -55,31 +56,34 @@ public class RiderServiceImplementation implements RiderService {
         String subject = EmailUtil.generateRideRequestEmailSubject(riderName);
 
         for(Driver driver : driverList) {
-            log.info("Driver - {}", driver);
             String body = EmailUtil.generateRideRequestEmail(rideRequest, driver);
             String driverEmail = driver.getUser().getEmail();
             emailSenderService.sendEmail(driverEmail, subject, body);
         }
+        log.info("Successfully requested Ride");
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
     @Override
     public RideDTO cancelRide(Long rideId) {
+        log.info("Cancelling Ride");
         Rider rider = this.getCurrentRider();
         Ride ride = rideService.getRideById(rideId);
         if(!ride.getRider().equals(rider)) {
             throw new RuntimeException("Rider does not own this ride with ID : " + rideId);
         }
-        if(ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+        if(!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
             throw new RuntimeException("Ride cannot be cancelled, invalid status : " + ride.getRideStatus());
         }
         Ride updatedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
         driverService.updateDriverAvailability(ride.getDriver(), true);
+        log.info("Successfully cancelled Ride");
         return modelMapper.map(updatedRide, RideDTO.class);
     }
 
     @Override
     public DriverDTO rateDriver(Long rideId, Integer rating) {
+        log.info("Rating Driver for Ride with ID : {}", rideId);
         Ride ride = rideService.getRideById(rideId);
         Rider rider = getCurrentRider();
         if(!rider.equals(ride.getRider())) {
@@ -88,19 +92,25 @@ public class RiderServiceImplementation implements RiderService {
         if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
             throw new RuntimeException("Ride status is not ended, hence cannot rate driver");
         }
+        log.info("Successfully rated Driver");
         return ratingService.rateDriver(ride, rating);
     }
 
     @Override
     public RiderDTO getMyProfile() {
+        log.info("Getting Rider profile");
         Rider rider = getCurrentRider();
+        log.info("Successfully fetched Rider profile");
         return modelMapper.map(rider, RiderDTO.class);
     }
 
     @Override
     public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
+        log.info("Fetching all rides of Rider");
         Rider currentRider = getCurrentRider();
-        return rideService.getAllRidesOfRider(currentRider, pageRequest).map(ride -> modelMapper.map(ride, RideDTO.class));
+        Page<RideDTO> rideDTOS =  rideService.getAllRidesOfRider(currentRider, pageRequest).map(ride -> modelMapper.map(ride, RideDTO.class));
+        log.info("Successfully fetched all rides of Rider");
+        return rideDTOS;
     }
 
     @Override
@@ -114,6 +124,7 @@ public class RiderServiceImplementation implements RiderService {
 
     @Override
     public Rider getCurrentRider() {
+        /* log.info("CONTEXT - {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal()); */
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return riderRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("No Rider associated with User having ID : " + user.getId()));
     }

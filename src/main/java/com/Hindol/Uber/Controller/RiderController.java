@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/rider")
 @RequiredArgsConstructor
@@ -37,10 +39,10 @@ public class RiderController {
     }
 
     @GetMapping("/getMyRides")
-    public ResponseEntity<Page<RideDTO>> getAllMyRides(@RequestParam(defaultValue = "0") Integer pageOffSet,
+    public ResponseEntity<List<RideDTO>> getAllMyRides(@RequestParam(defaultValue = "0") Integer pageOffSet,
                                                        @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(pageOffSet, pageSize, Sort.by(Sort.Direction.DESC,"createdTime", "id"));
-        return ResponseEntity.ok(riderService.getAllMyRides(pageRequest));
+        return ResponseEntity.ok(riderService.getAllMyRides(pageRequest).getContent());
     }
 
 }

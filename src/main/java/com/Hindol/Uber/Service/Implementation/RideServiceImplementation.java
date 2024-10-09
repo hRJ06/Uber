@@ -35,7 +35,6 @@ public class RideServiceImplementation implements RideService {
         Ride ride = modelMapper.map(rideRequest, Ride.class);
         ride.setRideStatus(RideStatus.CONFIRMED);
         ride.setDriver(driver);
-        /* TODO: Remove OTP field for Driver */
         ride.setOtp(generateRandomOTP());
         ride.setId(null);
         rideRequestService.update(rideRequest);

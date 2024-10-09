@@ -3,12 +3,14 @@ package com.Hindol.Uber.DTO;
 import com.Hindol.Uber.Entity.Enum.PaymentMethod;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RideRequestDTO {

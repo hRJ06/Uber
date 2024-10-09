@@ -3,47 +3,25 @@ package com.Hindol.Uber.Controller;
 import com.Hindol.Uber.DTO.LoginRequestDTO;
 import com.Hindol.Uber.DTO.OnboardDriverDTO;
 import com.Hindol.Uber.DTO.SignUpDTO;
-import com.Hindol.Uber.Entity.Enum.Role;
 import com.Hindol.Uber.Entity.User;
-import com.Hindol.Uber.Repository.UserRepository;
 import com.Hindol.Uber.Security.JWTService;
-import com.Hindol.Uber.TestContainerConfiguration;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@Import(TestContainerConfiguration.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuthControllerTestIT {
-    @Autowired
-    private MockMvc mockMvc;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class AuthControllerTestIT extends AbstractIntegrationTest {
 
     @Autowired
     private JWTService jwtService;
 
     private SignUpDTO signUpDTO;
     private LoginRequestDTO loginRequestDTO, invalidLoginRequestDTO;
-    private User user; /* RIDER */
 
     @BeforeEach
     void setUp() {
@@ -57,7 +35,6 @@ class AuthControllerTestIT {
                 .name("Rider")
                 .email("rider@gmail.com")
                 .password("ride")
-                .roles(Set.of(Role.RIDER))
                 .build();
         loginRequestDTO = LoginRequestDTO.builder()
                 .email("rider@gmail.com")
