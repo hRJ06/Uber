@@ -7,6 +7,8 @@ import com.Hindol.Uber.Entity.Driver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Map;
+
 
 public interface DriverService {
     RideDTO acceptRide(Long rideRequestId);
@@ -19,4 +21,5 @@ public interface DriverService {
     Driver getCurrentDriver();
     Driver updateDriverAvailability(Driver driver, boolean available);
     Driver createNewDriver(Driver driver);
+    DriverDTO updateDriver(Map<String, Object> fieldsToBeUpdated);
 }

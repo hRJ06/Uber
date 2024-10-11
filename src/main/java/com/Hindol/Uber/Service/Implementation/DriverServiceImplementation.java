@@ -3,29 +3,31 @@ package com.Hindol.Uber.Service.Implementation;
 import com.Hindol.Uber.DTO.DriverDTO;
 import com.Hindol.Uber.DTO.RideDTO;
 import com.Hindol.Uber.DTO.RiderDTO;
-import com.Hindol.Uber.Entity.Driver;
+import com.Hindol.Uber.Entity.*;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
-import com.Hindol.Uber.Entity.Ride;
-import com.Hindol.Uber.Entity.RideRequest;
-import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
+import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.DriverRepository;
 import com.Hindol.Uber.Service.*;
 import com.Hindol.Uber.Util.EmailUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class DriverServiceImplementation implements DriverService {
+    private static final Logger log = LoggerFactory.getLogger(DriverServiceImplementation.class);
     private final RideRequestService rideRequestService;
     private final DriverRepository driverRepository;
     private final RideService rideService;
@@ -33,6 +35,7 @@ public class DriverServiceImplementation implements DriverService {
     private final PaymentService paymentService;
     private final RatingService ratingService;
     private final EmailSenderService emailSenderService;
+    private final UserService userService;
     @Override
     @Transactional
     public RideDTO acceptRide(Long rideRequestId) {
@@ -46,7 +49,6 @@ public class DriverServiceImplementation implements DriverService {
         }
         Driver updatedDriver = updateDriverAvailability(currentDriver, false);
         Ride ride = rideService.createNewRide(rideRequest, updatedDriver);
-
         String riderEmail = ride.getRider().getUser().getEmail();
         String rider_email_subject = EmailUtil.generateRideConfirmationEmailSubjectForRider(updatedDriver);
         String rider_email_body = EmailUtil.generateRideConfirmationEmailForRider(ride, updatedDriver);
@@ -56,8 +58,6 @@ public class DriverServiceImplementation implements DriverService {
         String driver_email_subject = EmailUtil.generateRideConfirmationEmailSubjectForDriver(ride.getRider());
         String driver_email_body = EmailUtil.generateRideConfirmationEmailForDriver(ride, ride.getRider());
         emailSenderService.sendEmail(driverEmail, driver_email_subject, driver_email_body);
-
-        ride.setOtp(null);
         return modelMapper.map(ride, RideDTO.class);
     }
 
@@ -118,8 +118,10 @@ public class DriverServiceImplementation implements DriverService {
     public RiderDTO rateRider(Long rideId, Integer rating) {
         Ride ride = rideService.getRideById(rideId);
         Driver driver = getCurrentDriver();
+        log.info("DRIVER - {}", driver.toString());
+        log.info("RIDE DRIVER - {}", ride.getDriver().toString());
         if(!driver.equals(ride.getDriver())) {
-            throw new RuntimeException("Driver is not the owner of ride");
+            throw new RuntimeConflictException("Driver is not the owner of ride");
         }
         if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
             throw new RuntimeException("Ride status is not ended, hence cannot rate rider");
@@ -154,5 +156,16 @@ public class DriverServiceImplementation implements DriverService {
     @Override
     public Driver createNewDriver(Driver driver) {
         return driverRepository.save(driver);
+    }
+
+    @Override
+    public DriverDTO updateDriver(Map<String, Object> fieldsToBeUpdated) {
+        Driver driver = getCurrentDriver();
+        Long driverId = driver.getId();
+        log.info("Updating Driver by ID : {}", driverId);
+        userService.updateUserById(driver.getUser().getId(), fieldsToBeUpdated);
+        Driver updatedDriver = getCurrentDriver();
+        log.info("Successfully updated Driver By ID : {}", driverId);
+        return modelMapper.map(updatedDriver, DriverDTO.class);
     }
 }

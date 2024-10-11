@@ -3,12 +3,14 @@ package com.Hindol.Uber.Controller;
 import com.Hindol.Uber.DTO.*;
 import com.Hindol.Uber.Service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/drivers")
@@ -21,9 +23,9 @@ public class DriverController {
         return ResponseEntity.ok(driverService.acceptRide(rideRequestId));
     }
 
-    @PostMapping("/startRide/{rideRequestId}")
-    public ResponseEntity<RideDTO> startRide(@PathVariable Long rideRequestId, @RequestBody RideStartDTO rideStartDTO) {
-        return ResponseEntity.ok(driverService.startRide(rideRequestId, rideStartDTO.getOtp()));
+    @PostMapping("/startRide/{rideId}")
+    public ResponseEntity<RideDTO> startRide(@PathVariable Long rideId, @RequestBody RideStartDTO rideStartDTO) {
+        return ResponseEntity.ok(driverService.startRide(rideId, rideStartDTO.getOtp()));
     }
 
     @PostMapping("/endRide/{rideRequestId}")
@@ -37,7 +39,7 @@ public class DriverController {
     }
 
     @PostMapping("/rateRider")
-    public ResponseEntity<RiderDTO> rateDriver(@RequestBody RatingDTO ratingDTO) {
+    public ResponseEntity<RiderDTO> rateRider(@RequestBody RatingDTO ratingDTO) {
         return ResponseEntity.ok(driverService.rateRider(ratingDTO.getRideId(), ratingDTO.getRating()));
     }
 
@@ -47,9 +49,14 @@ public class DriverController {
     }
 
     @GetMapping("/getMyRides")
-    public ResponseEntity<Page<RideDTO>> getAllMyRides(@RequestParam(defaultValue = "0") Integer pageOffSet,
+    public ResponseEntity<List<RideDTO>> getAllMyRides(@RequestParam(defaultValue = "0") Integer pageOffSet,
                                                        @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(pageOffSet, pageSize, Sort.by(Sort.Direction.DESC,"createdTime", "id"));
-        return ResponseEntity.ok(driverService.getAllMyRides(pageRequest));
+        return ResponseEntity.ok(driverService.getAllMyRides(pageRequest).getContent());
+    }
+
+    @PutMapping("/updateProfile")
+    public ResponseEntity<DriverDTO> updateProfile(@RequestBody Map<String, Object> fieldsToBeUpdated) {
+        return ResponseEntity.ok(driverService.updateDriver(fieldsToBeUpdated));
     }
 }

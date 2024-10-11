@@ -1,9 +1,6 @@
 package com.Hindol.Uber.Service.Implementation;
 
-import com.Hindol.Uber.DTO.DriverDTO;
-import com.Hindol.Uber.DTO.RideDTO;
-import com.Hindol.Uber.DTO.RideRequestDTO;
-import com.Hindol.Uber.DTO.RiderDTO;
+import com.Hindol.Uber.DTO.*;
 import com.Hindol.Uber.Entity.*;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
@@ -23,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +35,7 @@ public class RiderServiceImplementation implements RiderService {
     private final DriverService driverService;
     private final RatingService ratingService;
     private final EmailSenderService emailSenderService;
+    private final UserService userService;
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
@@ -123,9 +122,21 @@ public class RiderServiceImplementation implements RiderService {
     }
 
     @Override
+    public RiderDTO updateRider(Map<String, Object> fieldsToBeUpdated) {
+        Rider rider = getCurrentRider();
+        Long riderId = rider.getId();
+        log.info("Updating Rider by ID : {}", riderId);
+        userService.updateUserById(rider.getUser().getId(), fieldsToBeUpdated);
+        Rider updatedRider = getCurrentRider();
+        log.info("Successfully updated Rider By ID : {}", riderId);
+        return modelMapper.map(updatedRider, RiderDTO.class);
+    }
+
+    @Override
     public Rider getCurrentRider() {
         /* log.info("CONTEXT - {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal()); */
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return riderRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("No Rider associated with User having ID : " + user.getId()));
     }
+
 }

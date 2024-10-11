@@ -3,7 +3,6 @@ package com.Hindol.Uber.Controller;
 import com.Hindol.Uber.DTO.*;
 import com.Hindol.Uber.Service.RiderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/rider")
@@ -43,6 +43,11 @@ public class RiderController {
                                                        @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(pageOffSet, pageSize, Sort.by(Sort.Direction.DESC,"createdTime", "id"));
         return ResponseEntity.ok(riderService.getAllMyRides(pageRequest).getContent());
+    }
+
+    @PutMapping("/updateProfile")
+    public ResponseEntity<RiderDTO> updateProfile(@RequestBody Map<String, Object> fieldsToBeUpdated) {
+        return ResponseEntity.ok(riderService.updateRider(fieldsToBeUpdated));
     }
 
 }
