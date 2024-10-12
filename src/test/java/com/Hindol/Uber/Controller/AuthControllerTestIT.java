@@ -6,6 +6,7 @@ import com.Hindol.Uber.DTO.SignUpDTO;
 import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Security.JWTService;
 import jakarta.servlet.http.Cookie;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,7 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
+@Slf4j
 class AuthControllerTestIT extends AbstractIntegrationTest {
 
     @Autowired
@@ -31,7 +32,7 @@ class AuthControllerTestIT extends AbstractIntegrationTest {
                 .password("rider")
                 .build();
         user = User.builder()
-                .id(1L)
+                .id(2L)
                 .name("Rider")
                 .email("rider@gmail.com")
                 .password("ride")
@@ -58,8 +59,39 @@ class AuthControllerTestIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin@gmail.com", roles = {"ADMIN"})
+    @WithMockUser(username = "driver@gmail.com", roles = {"ADMIN"})
     @Order(2)
+    void testOnBoardNewDriver_whenNoDriverExist_thenFailure() throws Exception {
+        OnboardDriverDTO onboardDriverDTO = OnboardDriverDTO.builder()
+                .vehicleId("3897")
+                .build();
+        mockMvc.perform(post("/auth/onboardNewDriver/45")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(onboardDriverDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.apiError.message").value("No User found with ID : 45"));
+    }
+    @Test
+    @WithMockUser(username = "driver@gmail.com", roles = {"DRIVER"})
+    @Order(3)
+    void testOnBoardNewDriver_whenUnauthorizedRole_Failure() throws Exception {
+        if (!userRepository.existsById(1L)) {
+            userRepository.save(user);
+        }
+        OnboardDriverDTO onboardDriverDTO = OnboardDriverDTO.builder()
+                .vehicleId("3897")
+                .build();
+        mockMvc.perform(post("/auth/onboardNewDriver/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(onboardDriverDTO)))
+                .andExpect(status().is5xxServerError())
+                .andExpect(jsonPath("$.apiError.message").value("Access Denied"));
+    }
+
+
+    @Test
+    @WithMockUser(username = "admin@gmail.com", roles = {"ADMIN"})
+    @Order(4)
     void testOnBoardNewDriver_whenSuccess() throws Exception {
         if (!userRepository.existsById(1L)) {
             userRepository.save(user);
@@ -73,37 +105,6 @@ class AuthControllerTestIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(onboardDriverDTO)))
                 .andExpect(status().isCreated());
-    }
-
-    @Test
-    @WithMockUser(username = "driver@gmail.com", roles = {"DRIVER"})
-    @Order(3)
-    void testOnBoardNewDriver_whenUnauthorizedRole_Failure() throws Exception {
-        if (!userRepository.existsById(1L)) {
-            userRepository.save(user);
-        }
-        OnboardDriverDTO onboardDriverDTO = OnboardDriverDTO.builder()
-                .vehicleId("3897")
-                .build();
-        mockMvc.perform(post("/auth/onboardNewDriver/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(onboardDriverDTO)))
-                .andExpect(status().is5xxServerError())
-                .andExpect(jsonPath("$.apiError.message").value("Access Denied"));
-    }
-
-    @Test
-    @WithMockUser(username = "driver@gmail.com", roles = {"ADMIN"})
-    @Order(4)
-    void testOnBoardNewDriver_whenNoDriverExist_thenFailure() throws Exception {
-        OnboardDriverDTO onboardDriverDTO = OnboardDriverDTO.builder()
-                .vehicleId("3897")
-                .build();
-        mockMvc.perform(post("/auth/onboardNewDriver/2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(onboardDriverDTO)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.apiError.message").value("No User found with ID : 2"));
     }
 
     @Test

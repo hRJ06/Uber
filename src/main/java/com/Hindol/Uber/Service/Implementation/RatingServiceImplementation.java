@@ -13,11 +13,13 @@ import com.Hindol.Uber.Repository.RatingRepository;
 import com.Hindol.Uber.Repository.RiderRepository;
 import com.Hindol.Uber.Service.RatingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RatingServiceImplementation implements RatingService {
     private final RatingRepository ratingRepository;
     private final DriverRepository driverRepository;
@@ -55,6 +57,7 @@ public class RatingServiceImplementation implements RatingService {
                 .stream()
                 .mapToDouble(Rating::getRiderRating)
                 .average().orElse(0.0);
+        log.info("Rider rating : {}", newRating);
         rider.setRating(newRating);
         Rider savedRider = riderRepository.save(rider);
         return modelMapper.map(savedRider, RiderDTO.class);

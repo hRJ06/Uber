@@ -3,10 +3,7 @@ package com.Hindol.Uber.Entity;
 import com.Hindol.Uber.Entity.Enum.PaymentMethod;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.locationtech.jts.geom.Point;
 
@@ -35,10 +32,10 @@ public class Ride {
     @CreationTimestamp
     private LocalDateTime createdTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Rider rider;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Driver driver;
 
     @Enumerated(EnumType.STRING)

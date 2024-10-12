@@ -11,6 +11,7 @@ import com.Hindol.Uber.Repository.RideRepository;
 import com.Hindol.Uber.Service.RideRequestService;
 import com.Hindol.Uber.Service.RideService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RideServiceImplementation implements RideService {
     private final RideRepository rideRepository;
     private final ModelMapper modelMapper;

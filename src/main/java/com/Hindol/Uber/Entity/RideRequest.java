@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @Table(
         indexes = {
                 @Index(name = "idx_ride_request_rider", columnList = "rider_id")
-        }
+        },
+        name = "ride_request"
 )
 public class RideRequest {
     @Id

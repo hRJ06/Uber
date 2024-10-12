@@ -118,8 +118,6 @@ public class DriverServiceImplementation implements DriverService {
     public RiderDTO rateRider(Long rideId, Integer rating) {
         Ride ride = rideService.getRideById(rideId);
         Driver driver = getCurrentDriver();
-        log.info("DRIVER - {}", driver.toString());
-        log.info("RIDE DRIVER - {}", ride.getDriver().toString());
         if(!driver.equals(ride.getDriver())) {
             throw new RuntimeConflictException("Driver is not the owner of ride");
         }
