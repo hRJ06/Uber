@@ -8,50 +8,30 @@ import com.Hindol.Uber.Entity.Enum.PaymentMethod;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
 import com.Hindol.Uber.Entity.Enum.Role;
-import com.Hindol.Uber.Repository.RatingRepository;
-import com.Hindol.Uber.Repository.RideRepository;
-import com.Hindol.Uber.Repository.RideRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
-import org.locationtech.jts.geom.GeometryFactory;
-
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.*;
 
 @ActiveProfiles("test")
 class RiderControllerTestIT extends AbstractIntegrationTest{
 
-    @Autowired
-    private RideRequestRepository rideRequestRepository;
-    @Autowired
-    private RideRepository rideRepository;
-    @Autowired
-    private RatingRepository ratingRepository;
-    private GeometryFactory geometryFactory;
-
-    private RideRequestDTO rideRequestDTO;
     private RatingDTO ratingDTO;
-    private Rider rider;
-    private Ride ride;
-    private Driver driver;
+    private RideRequestDTO rideRequestDTO;
     private Rating rating;
-    private Point pickUpLocation;
-    private Point dropOffLocation;
-
 
     @BeforeEach
     void setUp() {
@@ -80,7 +60,6 @@ class RiderControllerTestIT extends AbstractIntegrationTest{
                 .rating(0.0)
                 .build();
         rideRequestDTO = RideRequestDTO.builder()
-                .id(1L)
                 .pickUpLocation(new PointDTO(new double[]{74.1213, 28.234123}))
                 .dropOffLocation(new PointDTO(new double[]{74.221323, 28.33423123}))
                 .requestedTime(LocalDateTime.now())
@@ -89,7 +68,7 @@ class RiderControllerTestIT extends AbstractIntegrationTest{
 
         geometryFactory = new GeometryFactory();
 
-        pickUpLocation = geometryFactory.createPoint(new Coordinate(12.9716, 77.5946));
+        pickUpLocation = geometryFactory.createPoint(new Coordinate(74.1213, 28.234123));
         pickUpLocation.setSRID(4326);
 
         dropOffLocation = geometryFactory.createPoint(new Coordinate(74.221323, 28.33423123));
@@ -118,6 +97,7 @@ class RiderControllerTestIT extends AbstractIntegrationTest{
                 .rating(5)
                 .build();
 
+        paymentRepository.deleteAll();
         ratingRepository.deleteAll();
         rideRepository.deleteAll();
         rideRequestRepository.deleteAll();
@@ -156,6 +136,7 @@ class RiderControllerTestIT extends AbstractIntegrationTest{
         ride.setRideStatus(RideStatus.ENDED);
         Ride mockRide = rideRepository.save(ride);
         ratingRepository.save(rating);
+        ratingDTO.setRideId(mockRide.getId());
 
 
         mockMvc.perform(post("/rider/rateDriver")

@@ -3,9 +3,12 @@ package com.Hindol.Uber.Service.Implementation;
 import com.Hindol.Uber.DTO.DriverDTO;
 import com.Hindol.Uber.DTO.RideDTO;
 import com.Hindol.Uber.DTO.RiderDTO;
-import com.Hindol.Uber.Entity.*;
+import com.Hindol.Uber.Entity.Driver;
 import com.Hindol.Uber.Entity.Enum.RideRequestStatus;
 import com.Hindol.Uber.Entity.Enum.RideStatus;
+import com.Hindol.Uber.Entity.Ride;
+import com.Hindol.Uber.Entity.RideRequest;
+import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Exception.ResourceNotFoundException;
 import com.Hindol.Uber.Exception.RuntimeConflictException;
 import com.Hindol.Uber.Repository.DriverRepository;
@@ -68,7 +71,7 @@ public class DriverServiceImplementation implements DriverService {
         if(!driver.equals(ride.getDriver())) {
             throw new RuntimeException("Driver cannot cancel a ride as he has not accepted it earlier");
         }
-        if(ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+        if(!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
             throw new RuntimeException("Ride cannot be cancelled, invalid status : " + ride.getRideStatus());
         }
         Ride updatedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
