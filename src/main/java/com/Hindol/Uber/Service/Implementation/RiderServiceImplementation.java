@@ -91,8 +91,10 @@ public class RiderServiceImplementation implements RiderService {
         if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
             throw new RuntimeException("Ride status is not ended, hence cannot rate driver");
         }
+
+        DriverDTO driverDTO = ratingService.rateDriver(ride, rating);
         log.info("Successfully rated Driver");
-        return ratingService.rateDriver(ride, rating);
+        return driverDTO;
     }
 
     @Override

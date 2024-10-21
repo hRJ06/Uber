@@ -1,5 +1,6 @@
 package com.Hindol.Uber.Controller;
 
+import com.Hindol.Uber.Entity.Driver;
 import com.Hindol.Uber.Entity.User;
 import com.Hindol.Uber.Repository.UserRepository;
 import com.Hindol.Uber.TestContainerConfiguration;
@@ -27,6 +28,8 @@ public class AbstractIntegrationTest {
     @Autowired
     public UserRepository userRepository;
 
-    public User user; /* RIDER */
+    public User user;
+    public User user_rider;  /* RIDER */
+    public User user_driver; /* DRIVER */
 
 }

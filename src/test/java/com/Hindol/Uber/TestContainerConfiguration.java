@@ -16,4 +16,6 @@ public class TestContainerConfiguration {
                 .asCompatibleSubstituteFor("postgres");
         return new PostgreSQLContainer<>(image);
     }
+
+
 }
