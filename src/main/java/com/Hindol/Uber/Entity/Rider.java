@@ -17,4 +17,5 @@ public class Rider {
     @JoinColumn(name = "user_id")
     private User user;
     private Double rating;
+
 }

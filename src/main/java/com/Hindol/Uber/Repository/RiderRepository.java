@@ -10,5 +10,4 @@ import java.util.Optional;
 @Repository
 public interface RiderRepository extends JpaRepository<Rider, Long> {
     Optional<Rider> findByUser(User user);
-
 }
