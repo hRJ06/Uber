@@ -163,10 +163,8 @@ public class DriverServiceImplementation implements DriverService {
     public DriverDTO updateDriver(Map<String, Object> fieldsToBeUpdated) {
         Driver driver = getCurrentDriver();
         Long driverId = driver.getId();
-        log.info("Updating Driver by ID : {}", driverId);
         userService.updateUserById(driver.getUser().getId(), fieldsToBeUpdated);
         Driver updatedDriver = getCurrentDriver();
-        log.info("Successfully updated Driver By ID : {}", driverId);
         return modelMapper.map(updatedDriver, DriverDTO.class);
     }
 }

@@ -49,7 +49,7 @@ public class RatingServiceImplementation implements RatingService {
         Rider rider = ride.getRider();
         Rating ratingObj = ratingRepository.findByRide(ride).orElseThrow(() -> new ResourceNotFoundException("No Rating found for Ride ID : " + ride.getId()));
         if(ratingObj.getRiderRating() != null) {
-            throw new RuntimeConflictException("Rider is already been rated");
+            throw new RuntimeConflictException("Rider is already rated");
         }
         ratingObj.setRiderRating(rating);
         ratingRepository.save(ratingObj);
@@ -57,7 +57,6 @@ public class RatingServiceImplementation implements RatingService {
                 .stream()
                 .mapToDouble(Rating::getRiderRating)
                 .average().orElse(0.0);
-        log.info("Rider rating : {}", newRating);
         rider.setRating(newRating);
         Rider savedRider = riderRepository.save(rider);
         return modelMapper.map(savedRider, RiderDTO.class);
